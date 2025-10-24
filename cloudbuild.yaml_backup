@@ -8,30 +8,28 @@ steps:
     - "-c"
     - |
       docker build -t ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA .
-      docker tag ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:latest
+      docker tag ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA \
+                 ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:latest
       docker push ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA
       docker push ${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:latest
-
-- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-  entrypoint: "gcloud"
-  args:
-    - "run"
-    - "deploy"
-    - "${_IMAGE_NAME}"
-    - "--image"
-    - "${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
-    - "--region"
-    - "${_LOCATION}"
-    - "--platform"
-    - "managed"
-    - "--allow-unauthenticated"
 
 images:
 - "${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
 - "${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:latest"
 
 substitutions:
-  _LOCATION: "us-west2"
+  _LOCATION: "us-west2"       # custom substitution must begin with underscore
   _REPO_NAME: "my-docker-repo"
   _IMAGE_NAME: "my-web-app"
 
+
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  entrypoint: gcloud
+  args:
+    [
+      "run", "deploy", "my-web-app",
+      "--image", "us-west2-docker.pkg.dev/${PROJECT_ID}/my-docker-repo/my-web-app:$SHORT_SHA",
+      "--region", "us-west2",
+      "--platform", "managed",
+      "--allow-unauthenticated"
+    ]
