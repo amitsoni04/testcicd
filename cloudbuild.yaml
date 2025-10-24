@@ -22,3 +22,14 @@ substitutions:
   _REPO_NAME: "my-docker-repo"
   _IMAGE_NAME: "my-web-app"
 
+
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  entrypoint: gcloud
+  args:
+    [
+      "run", "deploy", "my-web-app",
+      "--image", "us-west2-docker.pkg.dev/${PROJECT_ID}/my-docker-repo/my-web-app:$SHORT_SHA",
+      "--region", "us-west2",
+      "--platform", "managed",
+      "--allow-unauthenticated"
+    ]
